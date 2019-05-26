@@ -1,5 +1,9 @@
 # uQuake 3
 
+_This is a fork of the original version that is quite a bit better optimized in load time and rendering. _
+
+_The old version used to generate a mesh (and gameobject) for each 'face' and for that mesh a new material which resulted in a lot of drawcalls. This version combines meshes where possible and uses the least amount of materials possible. It also created a lot of memory garbage which I got down by a lot, but it's not perfect and the zip reading still generates a lot._
+
 Load Quake 3 maps into Unity3D
 
 ### What is this?
