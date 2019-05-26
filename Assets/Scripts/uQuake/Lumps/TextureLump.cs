@@ -32,7 +32,7 @@ namespace SharpBSP
 
         public void PullInTextures(string pakName)
         {
-            using (ZipFile pak = ZipFile.Read("Assets/baseq3/" + pakName))
+            using (ZipFile pak = ZipFile.Read(Path.Combine(Application.streamingAssetsPath, pakName)))
             {
                 LoadJPGTextures(pak);
                 LoadTGATextures(pak);

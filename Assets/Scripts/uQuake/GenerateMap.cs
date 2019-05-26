@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using SharpBSP;
 using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 
 // http://answers.unity3d.com/questions/126048/create-a-button-in-the-inspector.html#answer-360940
@@ -87,7 +87,10 @@ public class GenerateMap : MonoBehaviour
                 if (mapIsInsidePK3)
                     map = new BSPMap(mapName, true);
                 else
-                    map = new BSPMap("Assets/baseq3/maps/" + mapName, false);
+                {
+                    string path = Path.Combine(Application.streamingAssetsPath, mapName);
+                    map = new BSPMap(path, false);
+                }
 
                 s.Stop();
                 Debug.Log($"Read map file in {s.ElapsedMilliseconds}ms");

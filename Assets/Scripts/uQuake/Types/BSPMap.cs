@@ -27,17 +27,17 @@ namespace SharpBSP
 
         public BSPMap(string filename, bool loadFromPK3)
         {
-            filename = "maps/" + filename;
+            filename = Path.Combine("maps/", filename);
 
             // Look through all available .pk3 files to find the map.
             // The first map will be used, which doesn't match Q3 behavior, as it would use the last found map, but eh.
             if (loadFromPK3)
             {
-                foreach (FileInfo info in new DirectoryInfo("Assets/baseq3/").GetFiles())
+                foreach (FileInfo info in new DirectoryInfo(Application.streamingAssetsPath).GetFiles())
                 {
                     if (info.Name.EndsWith(".PK3") || info.Name.EndsWith(".pk3"))
                     {
-                        using (ZipFile pk3 = ZipFile.Read("Assets/baseq3/" + info.Name))
+                        using (ZipFile pk3 = ZipFile.Read(info.FullName))
                         {
                             if (pk3.ContainsEntry(filename))
                             {
@@ -68,7 +68,7 @@ namespace SharpBSP
 
             // Comb through all of the available .pk3 files and load in any textures needed by the current map.
             // Textures in higher numbered .pk3 files will be used over ones in lower ones.
-            foreach (FileInfo info in new DirectoryInfo("Assets/baseq3/").GetFiles())
+            foreach (FileInfo info in new DirectoryInfo(Application.streamingAssetsPath).GetFiles())
                 if (info.Name.EndsWith(".pk3") || info.Name.EndsWith(".PK3"))
                     textureLump.PullInTextures(info.Name);
 
