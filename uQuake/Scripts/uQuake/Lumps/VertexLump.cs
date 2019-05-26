@@ -2,25 +2,19 @@
 
 namespace SharpBSP
 {
-    public class VertexLump
+    public struct VertexLump
     {
-		public Vertex[] Verts{ get; set; }
-		public int[] MeshVerts{ get; set; }
-
-        public VertexLump(int VertexCount)
-        {
-			Verts = new Vertex[VertexCount];
-        }
+        public Vertex[] verts;
+        public int[] meshVerts;
 
         public override string ToString()
         {
-			StringBuilder blob = new StringBuilder ();
-            int count = 0;
-            foreach (Vertex vert in Verts)
+            StringBuilder blob = new StringBuilder();
+            for (int i = 0; i < verts.Length; i++)
             {
-                blob.Append("Vertex " + count.ToString() + " Pos: " + vert.position.ToString() + " Normal: " + vert.normal.ToString() + "\r\n");
-                count++;
+                blob.Append("Vertex " + i + " Pos: " + verts[i].position + " Normal: " + verts[i].normal + "\r\n");
             }
+
             return blob.ToString();
         }
     }

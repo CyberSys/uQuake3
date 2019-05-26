@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 namespace SharpBSP
 {
-    public class Face
+    public struct Face
     {
         // The fields in this class are kind of obtuse.  I recommend looking up the Q3 .bsp map spec for full understanding.
 
@@ -22,7 +21,9 @@ namespace SharpBSP
         public Vector3 normal;
         public int[] size;
 
-        public Face(int texture, int effect, int type, int vertex, int n_vertexes, int meshvert, int n_meshverts, int lm_index, int[] lm_start, int[] lm_size, Vector3 lm_origin, Vector3[] lm_vecs, Vector3 normal, int[] size)
+        public Face(int texture, int effect, int type, int vertex, int n_vertexes, int meshvert, int n_meshverts,
+            int lm_index, int[] lm_start, int[] lm_size, Vector3 lm_origin, Vector3[] lm_vecs, Vector3 normal,
+            int[] size)
         {
             this.texture = texture;
             this.effect = effect;
@@ -38,6 +39,6 @@ namespace SharpBSP
             this.lm_vecs = lm_vecs;
             this.normal = normal;
             this.size = size;
-        } 
+        }
     }
 }

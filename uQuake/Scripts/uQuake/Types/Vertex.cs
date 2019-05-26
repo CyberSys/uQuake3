@@ -2,15 +2,15 @@
 
 namespace SharpBSP
 {
-    public class Vertex
+    public struct Vertex
     {
         public Vector3 position;
         public Vector3 normal;
         public byte[] color;
 
         // These are texture coords, or UVs
-        public Vector2 texcoord = new Vector2();
-        public Vector2 lmcoord = new Vector2();
+        public Vector2 texcoord;
+        public Vector2 lmcoord;
 
         public Vertex(Vector3 position, float texX, float texY, float lmX, float lmY, Vector3 normal, byte[] color)
         {
@@ -25,7 +25,7 @@ namespace SharpBSP
             // handle them.
             texcoord.x = texX;
             texcoord.y = -texY;
-            
+
             // Lightmaps aren't used for now, but store the
             // data for them anyway.  Inverted, same as above.
             lmcoord.x = lmX;
@@ -57,7 +57,6 @@ namespace SharpBSP
             normal.x = -normal.x;
 
             position.Scale(new Vector3(0.03f, 0.03f, 0.03f));
-            normal.Scale(new Vector3(0.03f, 0.03f, 0.03f));
         }
     }
 }

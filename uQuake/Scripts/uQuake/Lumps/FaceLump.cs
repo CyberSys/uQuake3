@@ -1,26 +1,28 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace SharpBSP
 {
-    public class FaceLump
+    public struct FaceLump
     {
-        public Face[] Faces { get; set; }
-
         public FaceLump(int faceCount)
         {
-            Faces = new Face[faceCount];
+            faces = new Face[faceCount];
         }
+
+        public Face[] faces;
 
         public string PrintInfo()
         {
             StringBuilder blob = new StringBuilder();
             int count = 0;
-            foreach (Face face in Faces)
+            foreach (Face face in faces)
             {
-                blob.AppendLine("Face " + count.ToString() + "\t Tex: " + face.texture.ToString() + "\tType: " + face.type.ToString() + "\tVertIndex: " + face.vertex.ToString() + "\tNumVerts: " + face.n_vertexes.ToString() + "\tMeshVertIndex: " + face.meshvert.ToString() + "\tMeshVerts: " + face.n_meshverts + "\r\n");
+                blob.AppendLine("Face " + count + "\t Tex: " + face.texture + "\tType: " + face.type + "\tVertIndex: " +
+                                face.vertex + "\tNumVerts: " + face.n_vertexes + "\tMeshVertIndex: " + face.meshvert +
+                                "\tMeshVerts: " + face.n_meshverts + "\r\n");
                 count++;
             }
+
             return blob.ToString();
         }
     }

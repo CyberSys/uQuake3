@@ -1,25 +1,7 @@
-using System;
-
 namespace SharpBSP
 {
     public class Texture
     {
-		public string Name {
-			get;
-			private set;
-		}
-
-		public int Flags {
-			get;
-			private set;
-		}
-
-		public int Contents {
-			get;
-			private set;
-		}
-
-
         public Texture(string rawName, int flags, int contents)
         {
             //The string is read as 64 characters, which includes a bunch of null bytes.  We strip them to avoid oddness when printing and using the texture names.
@@ -36,5 +18,11 @@ namespace SharpBSP
             Name = Name.Replace("flat_400", string.Empty);
             Name = Name.Replace("_750", string.Empty);
         }
+
+        public string Name { get; }
+
+        public int Flags { get; }
+
+        public int Contents { get; }
     }
 }
