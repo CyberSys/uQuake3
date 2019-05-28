@@ -416,44 +416,40 @@ public class GenerateMap : MonoBehaviour
 
             // Rip verts, uvs, and normals
             int vertexCount = face.n_vertexes;
-            Vector3[] verts = new Vector3[vertexCount];
-            Vector2[] uv = new Vector2[vertexCount];
-            Vector2[] uv2 = new Vector2[vertexCount];
-            Vector3[] normals = new Vector3[vertexCount];
-            int[] indicies = new int[face.n_meshverts];
-            int vertIndex = 0;
-            int faceIndex = 0;
+            List<Vector3> verts = new List<Vector3>(vertexCount);
+            List<Vector2> uv = new List<Vector2>(vertexCount);
+            List<Vector2> uv2 = new List<Vector2>(vertexCount);
+            List<Vector3> normals = new List<Vector3>(vertexCount);
+            List<int> indicies = new List<int>(face.n_meshverts);
 
             int vstep = face.vertex;
             for (int n = 0; n < face.n_vertexes; n++)
             {
-                verts[vertIndex] = map.vertexLump.verts[vstep].position;
-                uv[vertIndex] = map.vertexLump.verts[vstep].texcoord;
-                uv2[vertIndex] = map.vertexLump.verts[vstep].lmcoord;
-                normals[vertIndex] = map.vertexLump.verts[vstep].normal;
+                verts.Add(map.vertexLump.verts[vstep].position);
+                uv.Add(map.vertexLump.verts[vstep].texcoord);
+                uv2.Add(map.vertexLump.verts[vstep].lmcoord);
+                normals.Add(map.vertexLump.verts[vstep].normal);
                 vstep++;
-                vertIndex++;
             }
 
             // Rip meshverts / triangles
             int mstep = face.meshvert;
             for (int n = 0; n < face.n_meshverts; n++)
             {
-                indicies[faceIndex] = map.vertexLump.meshVerts[mstep];
+                indicies.Add(map.vertexLump.meshVerts[mstep]);
                 mstep++;
-                faceIndex++;
             }
 
             // add the verts, uvs, and normals we ripped to the gameobjects mesh filter
-            mesh.vertices = verts;
-            mesh.normals = normals;
+            mesh.SetVertices(verts);
+            mesh.SetNormals(normals);
 
             // Add the texture co-ords (or UVs) to the face/mesh
-            mesh.uv = uv;
-            mesh.uv2 = uv2;
+            mesh.SetUVs(0, uv);
+            mesh.SetUVs(1, uv2);
 
             // add the meshverts to the object being built
-            mesh.triangles = indicies;
+            mesh.SetTriangles(indicies, 0);
 
             // Let Unity do some heavy lifting for us
             mesh.RecalculateBounds();

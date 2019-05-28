@@ -100,14 +100,13 @@ public class BezierMesh
             }
 
             // Add the verts and tris
-            patchMesh.vertices = vertex.ToArray();
-            patchMesh.triangles = index.ToArray();
-            patchMesh.uv = uv.ToArray();
-            patchMesh.uv2 = uv2.ToArray();
+            patchMesh.SetVertices(vertex);
+            patchMesh.SetTriangles(index, 0, true);
+            patchMesh.SetUVs(0, uv);
+            patchMesh.SetUVs(2, uv2);
 
             // Dunno if these are needed, but why not?
             // They're actually pretty cheap, considering.
-            patchMesh.RecalculateBounds();
             patchMesh.RecalculateNormals();
             patchMesh.Optimize();
 
