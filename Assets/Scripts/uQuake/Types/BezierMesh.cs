@@ -1,12 +1,46 @@
 ﻿using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 public class BezierMesh
 {
     private static ProfilerMarker bezierMeshMarker = new ProfilerMarker("BezierMesh");
-    public List<Vector2> uvs;
+    private static List<Vector3> vertexCache = new List<Vector3>();
+    private static List<Vector2> uvCache = new List<Vector2>();
+    private static List<Vector2> uv2Cache = new List<Vector2>();
+    private static List<int> indiciesCache = new List<int>();
+
+    static private List<Vector3> p0sCache = new List<Vector3>();
+    static private List<Vector2> p0suvCache = new List<Vector2>();
+    static private List<Vector2> p0suv2Cache = new List<Vector2>();
+
+    static private List<Vector3> p1sCache = new List<Vector3>();
+    static private List<Vector2> p1suvCache = new List<Vector2>();
+    static private List<Vector2> p1suv2Cache = new List<Vector2>();
+
+    static private List<Vector3> p2sCache = new List<Vector3>();
+    static private List<Vector2> p2suvCache = new List<Vector2>();
+    static private List<Vector2> p2suv2Cache = new List<Vector2>();
+
+    public static void ClearCaches()
+    {
+        vertexCache = new List<Vector3>();
+        uvCache = new List<Vector2>();
+        uv2Cache = new List<Vector2>();
+        indiciesCache = new List<int>();
+
+        p0sCache = new List<Vector3>();
+        p0suvCache = new List<Vector2>();
+        p0suv2Cache = new List<Vector2>();
+
+        p1sCache = new List<Vector3>();
+        p1suvCache = new List<Vector2>();
+        p1suv2Cache = new List<Vector2>();
+
+        p2sCache = new List<Vector3>();
+        p2suvCache = new List<Vector2>();
+        p2suv2Cache = new List<Vector2>();
+    }
 
     // Where the magic happens.
     public BezierMesh(int level, List<Vector3> control, List<Vector2> controlUvs, List<Vector2> controlUv2s)
@@ -19,10 +53,30 @@ public class BezierMesh
 
             // We'll use these two to hold our verts, tris, and uvs
             int capacity = level * level + (2 * level);
-            List<Vector3> vertex = new List<Vector3>(capacity);
-            List<int> index = new List<int>(capacity);
-            List<Vector2> uv = new List<Vector2>(capacity);
-            List<Vector2> uv2 = new List<Vector2>(capacity);
+            if (vertexCache.Capacity < capacity)
+            {
+                vertexCache.Capacity = capacity;
+                uv2Cache.Capacity = capacity;
+                uvCache.Capacity = capacity;
+                indiciesCache.Capacity = capacity;
+            }
+
+            vertexCache.Clear();
+            uvCache.Clear();
+            uv2Cache.Clear();
+            indiciesCache.Clear();
+
+            p0sCache.Clear();
+            p0suvCache.Clear();
+            p0suv2Cache.Clear();
+
+            p1sCache.Clear();
+            p1suvCache.Clear();
+            p1suv2Cache.Clear();
+
+            p2sCache.Clear();
+            p2suvCache.Clear();
+            p2suv2Cache.Clear();
 
             // The incoming list is 9 entires, 
             // referenced as p0 through p8 here.
@@ -35,26 +89,29 @@ public class BezierMesh
             // p1s from p1 p4 p7
             // p2s from p2 p5 p8
 
-            List<Vector3> p0s = Tessellate(level, control[0], control[3], control[6]);
-            List<Vector2> p0suv = TessellateUV(level, controlUvs[0], controlUvs[3], controlUvs[6]);
-            List<Vector2> p0suv2 = TessellateUV(level, controlUv2s[0], controlUv2s[3], controlUv2s[6]);
+            Tessellate(level, control[0], control[3], control[6], p0sCache);
+            TessellateUV(level, controlUvs[0], controlUvs[3], controlUvs[6], p0suvCache);
+            TessellateUV(level, controlUv2s[0], controlUv2s[3], controlUv2s[6], p0suv2Cache);
 
-            List<Vector3> p1s = Tessellate(level, control[1], control[4], control[7]);
-            List<Vector2> p1suv = TessellateUV(level, controlUvs[1], controlUvs[4], controlUvs[7]);
-            List<Vector2> p1suv2 = TessellateUV(level, controlUv2s[1], controlUv2s[4], controlUv2s[7]);
+            Tessellate(level, control[1], control[4], control[7], p1sCache);
+            TessellateUV(level, controlUvs[1], controlUvs[4], controlUvs[7], p1suvCache);
+            TessellateUV(level, controlUv2s[1], controlUv2s[4], controlUv2s[7], p1suv2Cache);
 
-            List<Vector3> p2s = Tessellate(level, control[2], control[5], control[8]);
-            List<Vector2> p2suv = TessellateUV(level, controlUvs[2], controlUvs[5], controlUvs[8]);
-            List<Vector2> p2suv2 = TessellateUV(level, controlUv2s[2], controlUv2s[5], controlUv2s[8]);
+            Tessellate(level, control[2], control[5], control[8], p2sCache);
+            TessellateUV(level, controlUvs[2], controlUvs[5], controlUvs[8], p2suvCache);
+            TessellateUV(level, controlUv2s[2], controlUv2s[5], controlUv2s[8], p2suv2Cache);
 
             // Tessellate all those new sets of control points and pack
             // all the results into our vertex array, which we'll return.
             // Make our uvs list while we're at it.
             for (int i = 0; i <= level; i++)
             {
-                vertex.AddRange(Tessellate(level, p0s[i], p1s[i], p2s[i]));
-                uv.AddRange(TessellateUV(level, p0suv[i], p1suv[i], p2suv[i]));
-                uv2.AddRange(TessellateUV(level, p0suv2[i], p1suv2[i], p2suv2[i]));
+//                vertexCache.AddRange(Tessellate(level, p0s[i], p1s[i], p2s[i]));
+                Tessellate(level, p0sCache[i], p1sCache[i], p2sCache[i], vertexCache);
+//                uvCache.AddRange(TessellateUV(level, p0suv[i], p1suv[i], p2suv[i]));
+                TessellateUV(level, p0suvCache[i], p1suvCache[i], p2suvCache[i], uvCache);
+//                uv2Cache.AddRange(TessellateUV(level, p0suv2[i], p1suv2[i], p2suv2[i]));
+                TessellateUV(level, p0suv2Cache[i], p1suv2Cache[i], p2suv2Cache[i], uv2Cache);
             }
 
             // This will produce (tessellationLevel + 1)^2 verts
@@ -70,40 +127,40 @@ public class BezierMesh
                 //on left edge
                 if (xStep == 1)
                 {
-                    index.Add(i);
-                    index.Add(i + width);
-                    index.Add(i + 1);
+                    indiciesCache.Add(i);
+                    indiciesCache.Add(i + width);
+                    indiciesCache.Add(i + 1);
 
                     xStep++;
                 }
                 else if (xStep == width) //on right edge
                 {
-                    index.Add(i);
-                    index.Add(i + (width - 1));
-                    index.Add(i + width);
+                    indiciesCache.Add(i);
+                    indiciesCache.Add(i + (width - 1));
+                    indiciesCache.Add(i + width);
 
                     xStep = 1;
                 }
                 else // not on an edge, so add two
                 {
-                    index.Add(i);
-                    index.Add(i + (width - 1));
-                    index.Add(i + width);
+                    indiciesCache.Add(i);
+                    indiciesCache.Add(i + (width - 1));
+                    indiciesCache.Add(i + width);
 
 
-                    index.Add(i);
-                    index.Add(i + width);
-                    index.Add(i + 1);
+                    indiciesCache.Add(i);
+                    indiciesCache.Add(i + width);
+                    indiciesCache.Add(i + 1);
 
                     xStep++;
                 }
             }
 
             // Add the verts and tris
-            patchMesh.SetVertices(vertex);
-            patchMesh.SetTriangles(index, 0, true);
-            patchMesh.SetUVs(0, uv);
-            patchMesh.SetUVs(2, uv2);
+            patchMesh.SetVertices(vertexCache);
+            patchMesh.SetTriangles(indiciesCache, 0, true);
+            patchMesh.SetUVs(0, uvCache);
+            patchMesh.SetUVs(2, uv2Cache);
 
             // Dunno if these are needed, but why not?
             // They're actually pretty cheap, considering.
@@ -154,40 +211,40 @@ public class BezierMesh
     // p0 is start, p1 is the midpoint, p2 is the endpoint
     // The returned list begins with p0, ends with p2, with
     // the tessellated verts in between.
-    private List<Vector3> Tessellate(int level, Vector3 p0, Vector3 p1, Vector3 p2)
+    private void Tessellate(int level, Vector3 p0, Vector3 p1, Vector3 p2, List<Vector3> appendList = null)
     {
-        List<Vector3> vects = new List<Vector3>(level + 1);
+        if (appendList == null)
+            appendList = new List<Vector3>(level + 1);
 
         float stepDelta = 1.0f / level;
         float step = stepDelta;
 
-        vects.Add(p0);
+        appendList.Add(p0);
         for (int i = 0; i < level - 1; i++)
         {
-            vects.Add(BezCurve(step, p0, p1, p2));
+            appendList.Add(BezCurve(step, p0, p1, p2));
             step += stepDelta;
         }
 
-        vects.Add(p2);
-        return vects;
+        appendList.Add(p2);
     }
 
     // Same as above, but for UVs
-    private List<Vector2> TessellateUV(int level, Vector2 p0, Vector2 p1, Vector2 p2)
+    private void TessellateUV(int level, Vector2 p0, Vector2 p1, Vector2 p2, List<Vector2> appendList = null)
     {
-        List<Vector2> vects = new List<Vector2>(level + 2);
+        if (appendList == null)
+            appendList = new List<Vector2>(level + 2);
 
         float stepDelta = 1.0f / level;
         float step = stepDelta;
 
-        vects.Add(p0);
+        appendList.Add(p0);
         for (int i = 0; i < level - 1; i++)
         {
-            vects.Add(BezCurveUV(step, p0, p1, p2));
+            appendList.Add(BezCurveUV(step, p0, p1, p2));
             step += stepDelta;
         }
 
-        vects.Add(p2);
-        return vects;
+        appendList.Add(p2);
     }
 }

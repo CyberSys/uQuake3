@@ -136,6 +136,14 @@ public class GenerateMap : MonoBehaviour
                 s.Stop();
                 Debug.Log($"Loaded map in {s.ElapsedMilliseconds}ms");
             }
+
+
+            vertsCache = new List<Vector3>();
+            uvCache = new List<Vector2>();
+            uv2Cache = new List<Vector2>();
+            normalsCache = new List<Vector3>();
+            indiciesCache = new List<int>();
+            BezierMesh.ClearCaches();
         }
     }
 
@@ -405,6 +413,12 @@ public class GenerateMap : MonoBehaviour
         }
     }
 
+    private List<Vector3> vertsCache = new List<Vector3>();
+    private List<Vector2> uvCache = new List<Vector2>();
+    private List<Vector2> uv2Cache = new List<Vector2>();
+    private List<Vector3> normalsCache = new List<Vector3>();
+    private List<int> indiciesCache = new List<int>();
+
     // Generate a mesh for a simple polygon/mesh face
     // It's ready to render with tex coords and all.
     private Mesh GeneratePolygonMesh(Face face)
@@ -416,19 +430,30 @@ public class GenerateMap : MonoBehaviour
 
             // Rip verts, uvs, and normals
             int vertexCount = face.n_vertexes;
-            List<Vector3> verts = new List<Vector3>(vertexCount);
-            List<Vector2> uv = new List<Vector2>(vertexCount);
-            List<Vector2> uv2 = new List<Vector2>(vertexCount);
-            List<Vector3> normals = new List<Vector3>(vertexCount);
-            List<int> indicies = new List<int>(face.n_meshverts);
+            if (vertsCache.Capacity < vertexCount)
+            {
+                vertsCache.Capacity = vertexCount;
+                uvCache.Capacity = vertexCount;
+                uv2Cache.Capacity = vertexCount;
+                normalsCache.Capacity = vertexCount;
+            }
+
+            if (indiciesCache.Capacity < face.n_meshverts)
+                indiciesCache.Capacity = face.n_meshverts;
+
+            vertsCache.Clear();
+            uvCache.Clear();
+            uv2Cache.Clear();
+            normalsCache.Clear();
+            indiciesCache.Clear();
 
             int vstep = face.vertex;
             for (int n = 0; n < face.n_vertexes; n++)
             {
-                verts.Add(map.vertexLump.verts[vstep].position);
-                uv.Add(map.vertexLump.verts[vstep].texcoord);
-                uv2.Add(map.vertexLump.verts[vstep].lmcoord);
-                normals.Add(map.vertexLump.verts[vstep].normal);
+                vertsCache.Add(map.vertexLump.verts[vstep].position);
+                uvCache.Add(map.vertexLump.verts[vstep].texcoord);
+                uv2Cache.Add(map.vertexLump.verts[vstep].lmcoord);
+                normalsCache.Add(map.vertexLump.verts[vstep].normal);
                 vstep++;
             }
 
@@ -436,20 +461,20 @@ public class GenerateMap : MonoBehaviour
             int mstep = face.meshvert;
             for (int n = 0; n < face.n_meshverts; n++)
             {
-                indicies.Add(map.vertexLump.meshVerts[mstep]);
+                indiciesCache.Add(map.vertexLump.meshVerts[mstep]);
                 mstep++;
             }
 
             // add the verts, uvs, and normals we ripped to the gameobjects mesh filter
-            mesh.SetVertices(verts);
-            mesh.SetNormals(normals);
+            mesh.SetVertices(vertsCache);
+            mesh.SetNormals(normalsCache);
 
             // Add the texture co-ords (or UVs) to the face/mesh
-            mesh.SetUVs(0, uv);
-            mesh.SetUVs(1, uv2);
+            mesh.SetUVs(0, uvCache);
+            mesh.SetUVs(1, uv2Cache);
 
             // add the meshverts to the object being built
-            mesh.SetTriangles(indicies, 0);
+            mesh.SetTriangles(indiciesCache, 0);
 
             // Let Unity do some heavy lifting for us
             mesh.RecalculateBounds();
